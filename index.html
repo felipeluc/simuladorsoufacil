@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador SouFacil</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #0a6e4f;
+    }
+    label {
+      display: block;
+      margin-top: 20px;
+      font-weight: 600;
+    }
+    input,
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      margin-top: 30px;
+      padding: 14px;
+      background: #0a6e4f;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #08805b;
+    }
+    .calendario {
+      margin-top: 40px;
+    }
+    .mes {
+      margin-bottom: 40px;
+    }
+    .mes h3 {
+      background: #0a6e4f;
+      color: white;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .dias-semana {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      background: #cce5ff;
+      text-align: center;
+      font-weight: bold;
+      padding: 10px 0;
+    }
+    .dias {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+    .dia {
+      min-height: 80px;
+      padding: 8px;
+      background: #e9f7ef;
+      border-radius: 6px;
+      font-size: 14px;
+      position: relative;
+    }
+    .recebimento {
+      font-size: 12px;
+      background: #0a6e4f;
+      color: white;
+      padding: 4px;
+      border-radius: 6px;
+      margin-top: 4px;
+      text-align: center;
+    }
+    @media (max-width: 768px) {
+      .dias-semana,
+      .dias {
+        grid-template-columns: repeat(7, 1fr);
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Simulador de Recebimento SouFacil</h1>
+    <label for="valor">Valor da Venda (R$):</label>
+    <input type="number" id="valor" min="1" />
+
+    <label for="modelo">Modelo de Recebimento:</label>
+    <select id="modelo" onchange="atualizarParcelas()">
+      <option value="parcelado">Parcelado</option>
+      <option value="antecipado">Antecipado</option>
+    </select>
+
+    <label for="parcelas">Número de Parcelas:</label>
+    <select id="parcelas"></select>
+
+    <label for="vencimento">Data do Vencimento:</label>
+    <input type="date" id="vencimento" />
+
+    <button onclick="simular()">Simular</button>
+
+    <div class="calendario" id="calendario"></div>
+  </div>
+
+  <script>
+    function atualizarParcelas() {
+      const modelo = document.getElementById('modelo').value;
+      const parcelas = document.getElementById('parcelas');
+      parcelas.innerHTML = '';
+      const max = modelo === 'antecipado' ? 12 : 18;
+      for (let i = 1; i <= max; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.innerText = `${i}x`;
+        parcelas.appendChild(opt);
+      }
+    }
+
+    atualizarParcelas();
+
+    function adicionarDias(data, dias) {
+      const nova = new Date(data);
+      nova.setDate(nova.getDate() + dias);
+      return nova;
+    }
+
+    function formatarData(d) {
+      return d.toLocaleDateString('pt-BR');
+    }
+
+    function primeiraSextaFeira(fecha) {
+      const segunda = new Date(fecha);
+      segunda.setDate(segunda.getDate() - segunda.getDay() + 1);
+      const domingo = new Date(segunda);
+      domingo.setDate(domingo.getDate() + 6);
+      const sexta = new Date(domingo);
+      sexta.setDate(sexta.getDate() + 12);
+      return sexta;
+    }
+
+    function simular() {
+      const valor = parseFloat(document.getElementById('valor').value);
+      const modelo = document.getElementById('modelo').value;
+      const parcelas = parseInt(document.getElementById('parcelas').value);
+      const vencimento = new Date(document.getElementById('vencimento').value);
+
+      if (!valor || !vencimento || !parcelas) return;
+
+      const calendario = document.getElementById('calendario');
+      calendario.innerHTML = '';
+
+      let valorLiquido = modelo === 'antecipado' ? valor * 0.9 : valor * 0.95;
+
+      let recebimentos = [];
+
+      if (modelo === 'parcelado') {
+        for (let i = 0; i < parcelas; i++) {
+          const venc = new Date(vencimento);
+          venc.setMonth(venc.getMonth() + i);
+
+          const segunda = new Date(venc);
+          segunda.setDate(segunda.getDate() - segunda.getDay() + 1);
+          const domingo = new Date(segunda);
+          domingo.setDate(segunda.getDate() + 6);
+
+          const pagamento = new Date(domingo);
+          pagamento.setDate(domingo.getDate() + 12);
+          while (pagamento.getDay() !== 5) pagamento.setDate(pagamento.getDate() + 1);
+
+          recebimentos.push({ data: pagamento, valor: valorLiquido / parcelas, parcela: i + 1 });
+        }
+      } else {
+        const segunda = new Date(vencimento);
+        segunda.setDate(segunda.getDate() - segunda.getDay() + 1);
+        const domingo = new Date(segunda);
+        domingo.setDate(segunda.getDate() + 6);
+
+        let primeira = new Date(domingo);
+        primeira.setDate(primeira.getDate() + 12);
+        while (primeira.getDay() !== 5) primeira.setDate(primeira.getDate() + 1);
+
+        for (let i = 0; i < 16; i++) {
+          const pagamento = new Date(primeira);
+          pagamento.setDate(primeira.getDate() + i * 7);
+          recebimentos.push({ data: pagamento, valor: valorLiquido / 16, parcela: i + 1 });
+        }
+      }
+
+      mostrarCalendario(recebimentos);
+    }
+
+    function mostrarCalendario(recebimentos) {
+      const calendario = document.getElementById('calendario');
+      let mapa = new Map();
+
+      recebimentos.forEach(r => {
+        const key = `${r.data.getFullYear()}-${r.data.getMonth()}`;
+        if (!mapa.has(key)) mapa.set(key, []);
+        mapa.get(key).push(r);
+      });
+
+      mapa.forEach((lista, chave) => {
+        const [ano, mes] = chave.split('-').map(Number);
+        const dataRef = new Date(ano, mes);
+
+        const divMes = document.createElement('div');
+        divMes.className = 'mes';
+        divMes.innerHTML = `<h3>${dataRef.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</h3>`;
+
+        const diasSemana = document.createElement('div');
+        diasSemana.className = 'dias-semana';
+        ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].forEach(d => {
+          diasSemana.innerHTML += `<div>${d}</div>`;
+        });
+
+        const dias = document.createElement('div');
+        dias.className = 'dias';
+
+        const primeiroDia = new Date(ano, mes, 1);
+        const ultimoDia = new Date(ano, mes + 1, 0);
+        const offset = primeiroDia.getDay();
+
+        for (let i = 0; i < offset; i++) {
+          dias.innerHTML += '<div></div>';
+        }
+
+        for (let d = 1; d <= ultimoDia.getDate(); d++) {
+          const atual = new Date(ano, mes, d);
+          const div = document.createElement('div');
+          div.className = 'dia';
+          div.innerHTML = `<strong>${d}</strong>`;
+
+          lista.forEach(r => {
+            if (r.data.toDateString() === atual.toDateString()) {
+              div.innerHTML += `<div class="recebimento">Parc. ${r.parcela}: R$ ${r.valor.toFixed(2)}</div>`;
+            }
+          });
+
+          dias.appendChild(div);
+        }
+
+        divMes.appendChild(diasSemana);
+        divMes.appendChild(dias);
+        calendario.appendChild(divMes);
+      });
+    }
+  </script>
+</body>
+</html>
