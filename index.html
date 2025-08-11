@@ -1,279 +1,70 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+<!doctype html>
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Simulador SouFacil</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(to right, #f0f4ff, #e0eafc);
-      color: #333;
-    }
-    .container {
-      max-width: 700px;
-      margin: 60px auto;
-      background: white;
-      padding: 40px;
-      border-radius: 24px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      text-align: center;
-      color: #004aad;
-      font-weight: 700;
-      font-size: 28px;
-    }
-    label {
-      display: block;
-      margin-top: 20px;
-      font-weight: 600;
-    }
-    input,
-    select {
-      width: 100%;
-      padding: 12px;
-      margin-top: 8px;
-      border-radius: 12px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-    button {
-      width: 100%;
-      margin-top: 30px;
-      padding: 16px;
-      background: #004aad;
-      color: white;
-      border: none;
-      border-radius: 16px;
-      font-size: 18px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    button:hover {
-      background: #005ce6;
-    }
-    .calendario {
-      margin-top: 40px;
-    }
-    .mes {
-      margin-bottom: 40px;
-    }
-    .mes h3 {
-      background: #004aad;
-      color: white;
-      padding: 10px;
-      border-radius: 8px;
-      text-align: center;
-    }
-    .dias-semana {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      background: #cce5ff;
-      text-align: center;
-      font-weight: bold;
-      padding: 10px 0;
-    }
-    .dias {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-    }
-    .dia {
-      min-height: 80px;
-      padding: 8px;
-      background: #e9f0fc;
-      border-radius: 6px;
-      font-size: 14px;
-      position: relative;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      transition: background-color 0.3s ease;
-    }
-    .dia:hover {
-      background-color: #d0e0ff;
-    }
-    .recebimento {
-      font-size: 12px;
-      background: #004aad;
-      color: white;
-      padding: 4px;
-      border-radius: 6px;
-      margin-top: 4px;
-      text-align: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-  </style>
+
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>Simulador de Recebimento</h1>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">💳</div>
+        <div>
+          <h1>Simulador SouFacil</h1>
+          <p class="subtitle">Projeção de recebimentos</p>
+        </div>
+      </div>
+    </header>
 
-    <label for="valor">Valor Total das Vendas:</label>
-    <input type="text" id="valor" placeholder="Ex: 1.000.000,00" oninput="formatarMoeda(this)" />
+    <section class="controls">
+      <div class="card">
+        <label>Valor Total das Vendas (R$)</label>
+        <div class="input-row">
+          <span class="currency">R$</span>
+          <input id="valor" type="text" placeholder="0,00">
+        </div>
 
-    <label for="modelo">Modelo de Recebimento:</label>
-    <select id="modelo" onchange="atualizarParcelas()">
-      <option value="parcelado">Parcelado</option>
-      <option value="antecipado">Antecipado</option>
-    </select>
+        <label>Modelo de Recebimento</label>
+        <select id="modelo">
+          <option value="parcelado">Parcelado</option>
+          <option value="antecipado">Antecipado</option>
+        </select>
 
-    <div id="divParcelas">
-      <label for="parcelas">Número de Parcelas:</label>
-      <select id="parcelas"></select>
-    </div>
+        <div id="divParcelas">
+          <label>Número de Parcelas</label>
+          <select id="parcelas"></select>
+        </div>
 
-    <label for="fechamento">Mês de Fechamento das Vendas:</label>
-    <input type="month" id="fechamento" />
+        <label>Mês de Fechamento das Vendas</label>
+        <input type="month" id="fechamento">
 
-    <button onclick="simular()">Simular</button>
+        <div class="actions">
+          <button id="btnSimular" class="btn primary">Simular</button>
+          <button id="btnReset" class="btn ghost">Limpar</button>
+        </div>
+      </div>
 
-    <div class="calendario" id="calendario"></div>
-  </div>
+      <div class="card summary">
+        <h3>Resumo</h3>
+        <p id="resumoTexto">Preencha os dados e clique em <strong>Simular</strong>.</p>
+      </div>
+    </section>
 
-  <script>
-    // Formata o valor do input para moeda BRL
-    function formatarMoeda(campo) {
-      let valor = campo.value.replace(/\D/g, '');
-      valor = (parseInt(valor) / 100).toFixed(2).toString();
-      valor = valor.replace('.', ',');
-      valor = valor.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-      campo.value = valor;
-    }
+    <section class="visuals">
+      <div class="card calendar-card">
+        <h3>Calendário de Recebimentos</h3>
+        <div id="calendario"></div>
+      </div>
+    </section>
 
-    // Atualiza opções de parcelas e mostra/esconde campo de parcelas conforme modelo
-    function atualizarParcelas() {
-      const modelo = document.getElementById('modelo').value;
-      const divParcelas = document.getElementById('divParcelas');
-      const selectParcelas = document.getElementById('parcelas');
-      selectParcelas.innerHTML = '';
-      if (modelo === 'antecipado') {
-        divParcelas.style.display = 'none';
-      } else {
-        divParcelas.style.display = 'block';
-        for (let i = 1; i <= 18; i++) {
-          const opt = document.createElement('option');
-          opt.value = i;
-          opt.innerText = `${i}x`;
-          selectParcelas.appendChild(opt);
-        }
-      }
-    }
+    <footer class="footer">
+      <small>Feito no estilo Apple • SouFacil</small>
+    </footer>
+  </main>
 
-    atualizarParcelas();
-
-    // Converte valor formatado para número float
-    function parseValor(valorFormatado) {
-      return parseFloat(valorFormatado.replace(/\./g, '').replace(',', '.'));
-    }
-
-    // Função principal para simular os recebimentos
-    function simular() {
-      const valor = parseValor(document.getElementById('valor').value);
-      const modelo = document.getElementById('modelo').value;
-      const parcelas = modelo === 'antecipado' ? 4 : parseInt(document.getElementById('parcelas').value);
-      const fechamento = document.getElementById('fechamento').value;
-
-      const calendario = document.getElementById('calendario');
-      calendario.innerHTML = '';
-
-      if (!valor || !fechamento || !parcelas) {
-        calendario.innerHTML = "<p style='color:red;'>Preencha todos os campos corretamente.</p>";
-        return;
-      }
-
-      // Extrai ano e mês do input month (YYYY-MM)
-      const [ano, mes] = fechamento.split('-').map(Number);
-
-      // Data base: último dia do mês de fechamento
-      const ultimoDiaMes = new Date(ano, mes, 0); // 0 dá último dia do mês anterior, que aqui é o mês fechado
-
-      // Primeira parcela: dia 10 do segundo mês seguinte ao mês fechado (40 dias após fechamento)
-      let primeiraParcela = new Date(ultimoDiaMes);
-      primeiraParcela.setDate(primeiraParcela.getDate() + 40);
-      primeiraParcela.setDate(10);
-
-      // Taxa aplicada
-      const taxa = modelo === 'antecipado' ? 0.10 : 0.05;
-
-      // Valor líquido após taxa
-      const valorLiquido = valor * (1 - taxa);
-
-      // Valor por parcela
-      const valorParcela = valorLiquido / parcelas;
-
-      // Montar array de parcelas com datas fixas no dia 10
-      let recebimentos = [];
-      for (let i = 0; i < parcelas; i++) {
-        let dataParcela = new Date(primeiraParcela);
-        dataParcela.setMonth(dataParcela.getMonth() + i);
-        recebimentos.push({ data: dataParcela, valor: valorParcela, parcela: i + 1 });
-      }
-
-      mostrarCalendario(recebimentos);
-    }
-
-    // Função para exibir calendário com os recebimentos
-    function mostrarCalendario(recebimentos) {
-      const calendario = document.getElementById('calendario');
-      let mapa = new Map();
-
-      recebimentos.forEach(r => {
-        const key = `${r.data.getFullYear()}-${r.data.getMonth()}`;
-        if (!mapa.has(key)) mapa.set(key, []);
-        mapa.get(key).push(r);
-      });
-
-      mapa.forEach((lista, chave) => {
-        const [ano, mes] = chave.split('-').map(Number);
-        const dataRef = new Date(ano, mes);
-
-        const divMes = document.createElement('div');
-        divMes.className = 'mes';
-        divMes.innerHTML = `<h3>${dataRef.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</h3>`;
-
-        const diasSemana = document.createElement('div');
-        diasSemana.className = 'dias-semana';
-        ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].forEach(d => {
-          diasSemana.innerHTML += `<div>${d}</div>`;
-        });
-
-        const dias = document.createElement('div');
-        dias.className = 'dias';
-
-        const primeiroDia = new Date(ano, mes, 1);
-        const ultimoDia = new Date(ano, mes + 1, 0);
-        const offset = primeiroDia.getDay();
-
-        for (let i = 0; i < offset; i++) {
-          dias.innerHTML += '<div></div>';
-        }
-
-        for (let d = 1; d <= ultimoDia.getDate(); d++) {
-          const atual = new Date(ano, mes, d);
-          const div = document.createElement('div');
-          div.className = 'dia';
-          div.innerHTML = `<strong>${d}</strong>`;
-
-          lista.forEach(r => {
-            if (r.data.toDateString() === atual.toDateString()) {
-              div.innerHTML += `<div class="recebimento">Parc. ${r.parcela}: R$ ${r.valor.toFixed(2).replace('.', ',')}</div>`;
-            }
-          });
-
-          dias.appendChild(div);
-        }
-
-        divMes.appendChild(diasSemana);
-        divMes.appendChild(dias);
-        calendario.appendChild(divMes);
-      });
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
