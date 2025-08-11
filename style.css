@@ -1,0 +1,116 @@
+/* Reset básico */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial; }
+body {
+  background: linear-gradient(180deg, #f6f9ff 0%, #ffffff 100%);
+  color: #0b2546;
+  -webkit-font-smoothing:antialiased;
+  padding: 20px;
+}
+.app { max-width: 1200px; margin: 0 auto; }
+
+/* Topbar */
+.topbar { display:flex; align-items:center; margin-bottom: 18px; }
+.brand { display:flex; gap:12px; align-items:center; }
+.logo {
+  width:54px; height:54px; border-radius:12px;
+  background: linear-gradient(135deg,#dbe9ff,#b6d3ff);
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; box-shadow: 0 6px 20px rgba(16,64,150,0.08);
+}
+.brand h1 { font-size:18px; font-weight:600; }
+.subtitle { font-size:13px; color:#5b6b8a; }
+
+/* Layout */
+.controls { display:grid; grid-template-columns: 1fr 360px; gap: 18px; margin-bottom: 18px; }
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 6px 24px rgba(20,40,80,0.06);
+}
+.card h3 { margin-bottom:10px; color:#08326b; }
+
+/* Inputs */
+label { display:block; font-size:13px; margin-top:10px; color:#2b3b5a; }
+.input-row {
+  display:flex; align-items:center; gap:8px; margin-top:8px;
+}
+.input-row input[type="text"], input[type="month"] {
+  flex:1;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid #e6eefb;
+  background: linear-gradient(180deg,#ffffff,#fbfdff);
+  font-size:15px;
+  text-align:right;
+}
+.currency { color:#5b6b8a; font-weight:600; padding-left:6px; }
+select {
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #e6eefb;
+  margin-top:8px;
+  background:white;
+}
+
+/* Buttons */
+.actions { display:flex; gap:10px; margin-top:14px; }
+.btn {
+  padding:10px 14px; border-radius:10px; border:0; cursor:pointer; font-weight:600;
+  box-shadow: 0 6px 14px rgba(8, 30, 80, 0.06);
+}
+.btn.primary { background: linear-gradient(180deg,#2b7aff,#0b68ff); color:white; }
+.btn.ghost { background:transparent; color:#0b2546; border:1px solid #e6eefb; }
+
+/* Calendar */
+#calendario { max-height:500px; overflow:auto; padding:6px; }
+.mes { margin-bottom: 20px; }
+.mes h3 {
+  background: #0b68ff;
+  color: white;
+  padding: 8px;
+  border-radius: 8px;
+  font-size:14px;
+}
+.dias-semana {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-weight: bold;
+  font-size: 12px;
+  color: #5b6b8a;
+  margin-bottom:4px;
+}
+.dias {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.dia {
+  min-height: 70px;
+  padding: 4px;
+  background: #f6f9ff;
+  border-radius: 8px;
+  font-size: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.recebimento {
+  font-size: 11px;
+  background: #0b68ff;
+  color: white;
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin-top: 2px;
+  display:block;
+  text-align:center;
+}
+
+/* Footer */
+.footer { text-align:center; color:#6b7a97; font-size:13px; margin-top:8px; }
+
+/* Responsividade */
+@media (max-width: 960px) {
+  .controls { grid-template-columns: 1fr; }
+  .visuals { grid-template-columns: 1fr; }
+}
